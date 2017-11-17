@@ -1,5 +1,5 @@
 #!/usr/bin/python2
-import pygame
+import pygame_sdl2 as pygame
 import py_retro
 import sys
 

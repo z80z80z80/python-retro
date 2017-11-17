@@ -1,7 +1,7 @@
 """
 Pygame output for libretro Video.
 """
-import pygame
+import pygame_sdl2 as pygame
 import ctypes
 
 
@@ -34,8 +34,7 @@ def set_video_refresh_cb(core, callback):
         bytes_per_pixel = (bpp + 7) // 8
         convsurf = pygame.Surface((pitch // bytes_per_pixel, height), depth=bpp, masks=bitmasks)
         surf = convsurf.subsurface((0, 0, width, height))
-
-        convsurf.get_buffer().write(ctypes.string_at(data, pitch * height), 0)
+        ctypes.memmove(convsurf._pixels_address, data, pitch*height)
 
         callback(surf)
 

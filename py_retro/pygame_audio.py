@@ -2,7 +2,7 @@
 Pygame output for SNES Audio.
 """
 
-import pygame
+import pygame_sdl2 as pygame
 import struct
 import ctypes
 

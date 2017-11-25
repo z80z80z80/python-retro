@@ -32,7 +32,7 @@ def set_video_refresh_cb(core, callback):
 
         # i.e. results in a surface width of "pitch//((15+7)//8)" = "pitch//2" for 15-bit
         bytes_per_pixel = (bpp + 7) // 8
-        convsurf = pygame.Surface((pitch // bytes_per_pixel, height), depth=bpp, masks=bitmasks)
+        convsurf = pygame.Surface((pitch // bytes_per_pixel, height), flags=pygame.HWSURFACE, depth=bpp, masks=bitmasks)
         surf = convsurf.subsurface((0, 0, width, height))
 
         convsurf.get_buffer().write(ctypes.string_at(data, pitch * height), 0)
@@ -51,4 +51,4 @@ def set_video_refresh_surface(core, targetsurf):
 
 def pygame_display_set_mode(core, use_max=True):
     key = 'max_size' if use_max else 'base_size'
-    return pygame.display.set_mode(core.get_av_info()[key])
+    return pygame.display.set_mode(core.get_av_info()[key], pygame.HWSURFACE | pygame.DOUBLEBUF)

@@ -13,7 +13,7 @@ def main():
     screen = py_retro.pygame_video.pygame_display_set_mode(es, False)
 
     py_retro.pygame_video.set_video_refresh_surface(es, screen)
-    py_retro.portaudio_audio.set_audio_sample_internal(es)
+    # py_retro.portaudio_audio.set_audio_sample_internal(es)
     py_retro.pygame_input.set_input_poll_joystick(es)
 
     # run each frame until closed.

@@ -38,6 +38,18 @@ class FfmpegVideoMixin(PygameVideoMixin):
                                        stderr=subprocess.STDOUT)
         return self.__pipe
 
+    def video_stream(self, destination_stream, extra_params=()):
+        w, h = self.__framebuffer.get_size()
+        fps = self.__fps
+        cmd = (f'ffmpeg -y -f rawvideo -c:v rawvideo -s {w}x{h} -pix_fmt {self.__pix_fmt}'
+               f' -r {fps} -i - -an -pix_fmt yuv420p').split()
+        cmd.extend(extra_params)
+        cmd.append(destination_stream)
+        self.__pipe = subprocess.Popen(cmd, stdin=subprocess.PIPE,
+                                       stdout=subprocess.DEVNULL,
+                                       stderr=subprocess.STDOUT)
+        return self.__pipe
+
     def get_video_resolution(self) -> tuple:
         return self.__framebuffer.get_size()
 

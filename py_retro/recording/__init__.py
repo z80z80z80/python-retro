@@ -30,3 +30,15 @@ class AVRecorderSystem(FfmpegVideoMixin, WavFileAudioMixin):
         finally:
             os.unlink(temp_vid)
             os.unlink(temp_aud)
+
+
+class AVStreamerSystem(FfmpegVideoMixin, WavFileAudioMixin):
+    @contextmanager
+    def av_stream(self, video_params=(), audio_params=()):
+        temp_name = tempfile.mktemp()
+        destination_stream = f'http://localhost:8090/feed1.ffm'
+        with self.video_stream(destination_stream, video_params):
+            yield
+            #with self.wav_record(temp_aud):
+                #yield
+

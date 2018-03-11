@@ -3,6 +3,8 @@ WAV-file output for libretro Audio.
 """
 
 import subprocess
+from threading import Thread
+
 import pygame
 
 from ..api.retro_constants import PIXEL_FORMAT_0RGB1555, PIXEL_FORMAT_XRGB8888, PIXEL_FORMAT_RGB565, rcl
@@ -38,22 +40,40 @@ class FfmpegVideoMixin(PygameVideoMixin):
                                        stderr=subprocess.STDOUT)
         return self.__pipe
 
-    def video_stream(self, destination_stream, extra_params=()):
+    def video_stream(self, extra_params=()):
         w, h = self.__framebuffer.get_size()
         fps = self.__fps
         fps = 30  # force 30
-        print("streaming at " + str(fps))
-        cmd = (f'ffmpeg -y -f rawvideo -c:v rawvideo -s {w}x{h} -pix_fmt {self.__pix_fmt}'
+        cmd = (f'ffmpeg -f rawvideo -c:v rawvideo -s {w}x{h} -pix_fmt {self.__pix_fmt}'
                f' -r {fps} -i - -an -pix_fmt yuv420p').split()
         cmd.extend(extra_params)
-        cmd.append(destination_stream)
+        cmd.extend('-')
+        print("streaming with command " + str(cmd))
+
+        #ftl_cmd = (f'/home/vivlim/git/ftl-sdk/build/ftl_app').split()
+        ftl_cmd = (f'/home/vivlim/git/ftl-sdk/build/ftl_app -s <STREAM KEY> -S -i ingest-sea.mixer.com').split()
+
         self.__pipe = subprocess.Popen(cmd, stdin=subprocess.PIPE,
-                                       stdout=subprocess.DEVNULL,
-                                       stderr=subprocess.STDOUT)
+                                        stdout=subprocess.PIPE,
+                                       stderr=subprocess.DEVNULL)
+
+        self.__pipe_mixer = subprocess.Popen(ftl_cmd, stdin=self.__pipe.stdout, stdout=subprocess.PIPE)
+
+        #self._watch_subprocess_stdout(self.__pipe.stdout, "ffmpeg")
+        self._watch_subprocess_stdout(self.__pipe_mixer.stdout, "mixer")
         return self.__pipe
 
     def get_video_resolution(self) -> tuple:
         return self.__framebuffer.get_size()
+
+    def _watch_subprocess_stdout(self, pipe, label):
+        stdout_viewer = Thread(target=self._subprocess_stdout_thread, args=(pipe, label,), daemon=True)
+        stdout_viewer.start()
+
+    @staticmethod
+    def _subprocess_stdout_thread(pipe, label):
+        for line in iter(pipe.readline, b''):
+            print("[{}]: {}".format(label, str(line).rstrip()))
 
     def _set_pixel_format(self, fmt: int):
         try:
@@ -90,6 +110,7 @@ class FfmpegVideoMixin(PygameVideoMixin):
         if self.surface and self.__framebuffer and self.__pipe:
             if self.__pipe.stdin.closed:
                 self.__pipe = None
+                print("Pipe is closed :(")
                 return
             pygame.transform.scale(self.surface, self.__framebuffer.get_size(), self.__framebuffer)
             self.__pipe.stdin.write(self.__framebuffer.get_view('2').raw)

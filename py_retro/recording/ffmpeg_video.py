@@ -41,7 +41,7 @@ class FfmpegVideoMixin(PygameVideoMixin):
     def video_stream(self, destination_stream, extra_params=()):
         w, h = self.__framebuffer.get_size()
         fps = self.__fps
-        fps = 30  # force 30
+        fps = 60  # force 60
         print("streaming at " + str(fps))
         cmd = (f'ffmpeg -y -f rawvideo -c:v rawvideo -s {w}x{h} -pix_fmt {self.__pix_fmt}'
                f' -r {fps} -i - -an -pix_fmt yuv420p').split()

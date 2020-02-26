@@ -3,10 +3,10 @@ Pygame output for libretro Video.
 """
 import pygame
 import ctypes
-import cv2, os
+import cv2, os, threading
 import numpy as np
 
-def set_video_refresh_cb(core, callback):
+def set_video_refresh_cb(core, callback, r=False):
     """
     Sets the callback that will handle updated video frames.
 
@@ -15,6 +15,7 @@ def set_video_refresh_cb(core, callback):
 
         "surf" is an instance of pygame.Surface containing the frame data.
     """
+    global surf
 
     fmt = core.env_props.get('pixel_format')
     # default: 0rgb1555 (assumed if the env_cb isn't called to set one)
@@ -40,32 +41,48 @@ def set_video_refresh_cb(core, callback):
         surf = convsurf.subsurface((0, 0, width, height))
         ctypes.memmove(convsurf._pixels_address, data, pitch*height)
         
-        color_image = pygame.surfarray.array3d(surf)
+        #color_image = pygame.surfarray.array3d(surf)
         
-        color_image = cv2.transpose(color_image)
-        color_image = cv2.cvtColor(color_image, cv2.COLOR_RGB2BGR)
+        #color_image = cv2.transpose(color_image)
+        #color_image = cv2.cvtColor(color_image, cv2.COLOR_RGB2BGR)
         #pygame.image.save(surf, "screenshot.jpg")
         #img = cv2.imread("screenshot.jpg")
-        cv2.imwrite("static/tmp.jpg", color_image, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
-        os.system("mv static/tmp.jpg static/img.jpg")
-       
+        #cv2.imwrite("static/tmp.jpg", color_image, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
+        #threading.Thread(target=cv2.imwrite, args=["static/tmp.jpg", color_image, [int(cv2.IMWRITE_JPEG_QUALITY), 100]], daemon=True).start()
+        #threading.Thread(target=os.system, args=["mv static/tmp.jpg static/img.jpg"], daemon=True).start()
+        
+        #threading.Thread(target=write_buffer, args=[surf], daemon=True).start()
+        write_buffer(surf)
+        
+        #os.system("mv static/tmp.jpg static/img.jpg")
+        
         callback(surf)
 
     core.set_video_refresh_cb(wrapper)
 
+def write_buffer(surf):
+    color_image = pygame.surfarray.array3d(surf)
+    
+    color_image = cv2.transpose(color_image)
+    color_image = cv2.cvtColor(color_image, cv2.COLOR_RGB2BGR)
+    
+    threading.Thread(target=cv2.imwrite, args=["static/tmp.jpg", color_image, [int(cv2.IMWRITE_JPEG_QUALITY), 100]], daemon=True).start()
+    threading.Thread(target=os.system, args=["mv static/tmp.jpg static/img.jpg"], daemon=True).start()
+
 
 def set_video_refresh_surface(core, targetsurf, scale=False):
+    
     if not scale:
         def wrapper(surf):
             targetsurf.blit(surf, (0, 0))
     else:
         def wrapper(surf):
             pygame.transform.scale(surf, targetsurf.get_size(), targetsurf)
-
+    
     set_video_refresh_cb(core, wrapper)
 
 
 def pygame_display_set_mode(core, use_max=True):
     key = 'max_size' if use_max else 'base_size'
-    return None#pygame.display.set_mode(core.get_av_info()[key])
+    return pygame.Surface((1,1))#pygame.display.set_mode(core.get_av_info()[key])
 

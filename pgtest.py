@@ -1,10 +1,11 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
+
 import pygame
 import py_retro
 import sys
+import os
 
-libpath, rompath = sys.argv[1:3]
-
+libpath, rompath = "/usr/lib/libretro/gambatte_libretro.so", "pkm.gb"
 
 def main():
     es = py_retro.core.EmulatedSystem(libpath)
@@ -23,7 +24,7 @@ def main():
 
     while running:
         es.run()
-        pygame.display.flip()
+        #pygame.display.flip()
         clock.tick(fps)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -31,4 +32,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except:
+        print("EXCEPTION")
+        os.system("killall python")
+        os.system("create_ap --stop ap0")

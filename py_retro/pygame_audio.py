@@ -25,18 +25,20 @@ g_channel = None
 def _enqueue_sound(snd):
     global g_channel
     if g_channel:
-        g_channel.queue(snd)
+        foo = 0
+        #g_channel.queue(snd)
 
 
 def pygame_mixer_init(core):
     global g_channel
+    '''
     if not pygame.mixer.get_init():
         freq = int(core.get_av_info()['sample_rate'] or 32040)
         pygame.mixer.init(frequency=freq, size=-16, channels=g_stereo_channels,
                           buffer=g_num_samples)
         g_channel = pygame.mixer.Channel(0)
         g_channel.set_volume(0.5)
-
+    '''
 
 def set_audio_sample_cb(core, callback=_enqueue_sound):
     """
@@ -51,13 +53,15 @@ def set_audio_sample_cb(core, callback=_enqueue_sound):
     If no callback function is provided, the default implementation of
     snd.play() is used.
     """
+
+    '''
     pygame_mixer_init(core)
 
     stereo_struct = struct.Struct('<hh')
-
+    '''
     def wrapper(left, right):
-        global g_buffer, g_sound_size
-
+        global g_buffer, g_sound_size        
+        '''
         if len(g_buffer) > g_buffer_max:
             g_buffer = b''
 
@@ -66,7 +70,7 @@ def set_audio_sample_cb(core, callback=_enqueue_sound):
         if len(g_buffer) >= g_sound_size:
             callback(pygame.mixer.Sound(buffer=g_buffer[:g_sound_size]))
             g_buffer = g_buffer[g_sound_size:]
-
+        '''
     core.set_audio_sample_cb(wrapper)
 
 
@@ -87,7 +91,7 @@ def set_audio_sample_batch_cb(core, callback=_enqueue_sound):
 
     def wrapper(data, frames):
         global g_buffer, g_sound_size, g_buffer_max
-
+        '''
         if len(g_buffer) > g_buffer_max:
             g_buffer = b''
 
@@ -96,7 +100,7 @@ def set_audio_sample_batch_cb(core, callback=_enqueue_sound):
         if len(g_buffer) >= g_sound_size:
             callback(pygame.mixer.Sound(buffer=g_buffer[:g_sound_size]))
             g_buffer = g_buffer[g_sound_size:]
-
+        '''
         return frames
 
     core.set_audio_sample_batch_cb(wrapper)

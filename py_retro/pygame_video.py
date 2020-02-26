@@ -3,7 +3,8 @@ Pygame output for libretro Video.
 """
 import pygame
 import ctypes
-
+import cv2, os
+import numpy as np
 
 def set_video_refresh_cb(core, callback):
     """
@@ -33,9 +34,21 @@ def set_video_refresh_cb(core, callback):
         # i.e. results in a surface width of "pitch//((15+7)//8)" = "pitch//2" for 15-bit
         bytes_per_pixel = (bpp + 7) // 8
         convsurf = pygame.Surface((pitch // bytes_per_pixel, height), depth=bpp, masks=bitmasks)
+        #img = np.empty((pitch*height,))#, dtype=np.uint8)
+        #ctypes.memmove(img.ctypes.data, data, pitch*height)
+        #print(data, bytes_per_pixel, width, height, pitch)
         surf = convsurf.subsurface((0, 0, width, height))
         ctypes.memmove(convsurf._pixels_address, data, pitch*height)
-
+        
+        color_image = pygame.surfarray.array3d(surf)
+        
+        color_image = cv2.transpose(color_image)
+        color_image = cv2.cvtColor(color_image, cv2.COLOR_RGB2BGR)
+        #pygame.image.save(surf, "screenshot.jpg")
+        #img = cv2.imread("screenshot.jpg")
+        cv2.imwrite("static/tmp.jpg", color_image, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
+        os.system("mv static/tmp.jpg static/img.jpg")
+       
         callback(surf)
 
     core.set_video_refresh_cb(wrapper)
@@ -54,5 +67,5 @@ def set_video_refresh_surface(core, targetsurf, scale=False):
 
 def pygame_display_set_mode(core, use_max=True):
     key = 'max_size' if use_max else 'base_size'
-    return pygame.display.set_mode(core.get_av_info()[key])
+    return None#pygame.display.set_mode(core.get_av_info()[key])
 

@@ -1,4 +1,5 @@
 from . import core
+from . import joycon
 
 from . import pygame_video
 

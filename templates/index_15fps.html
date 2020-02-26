@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>LibRetro</title>
+        <link rel="stylesheet" type="text/css" href="static/style.css">
+        <script type="text/javascript" src="static/jquery-3.4.1.min.js"></script>
+        <script type="text/javascript" src="static/fullscreen.js"></script> <!-- script that handles switching to fullscreen -->
+        <script type="text/javascript" src="static/joycon.js" frameskip=4></script> <!-- handles joycon input, updates frames -->
+        <script type="text/javascript" src="static/start.js"></script> <!-- starts the scripts when joycons are connected -->
+    </head>
+
+    <body style="background-color:black;">	
+	<div id=container style="margin:auto;text-align:center;background-color:black">
+	    <a> <!-- Using an image object instead of WebRTC since the switch browser does not support this. 
+		     This produces a ~3x stretched out image to fill the screen. Keeping the aspect ratio. -->
+        	<img src="static/placeholder.jpg" style="width:1280px;height:720px;" id="image" class="center"/>  
+	    </a>
+	</div>
+
+        <script type="text/javascript"> // script that actually toggles the fullscreen script 
+            document.getElementById('container').onclick = function () {
+                document.getElementById("image").src="static/img.jpg?t=" + new Date().getTime();;
+		fullscreen();
+                };	
+	</script> 
+    </body>
+
+</html>

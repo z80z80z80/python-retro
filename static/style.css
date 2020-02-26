@@ -1,0 +1,18 @@
+img {
+  image-rendering: auto;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: pixelated;
+}
+
+.pixelated {
+  -ms-interpolation-mode: nearest-neighbor;
+  image-rendering: pixelated;
+}
+
+a.img_container img {
+    width: auto; // to maintain aspect ratio. You can use 100% if you don't care about that
+    height: 100%;
+}
+
+
